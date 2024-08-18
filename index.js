@@ -9,6 +9,7 @@ const corsOptions = {
     "*",
     "http://localhost:5173",
     "http://localhost:5174",
+    "https://ecommerce-c5cf4.web.app/"
   ],
   credentials: true,
   optionSuccessStatus: 200,
@@ -63,26 +64,36 @@ async function run() {
         res.send(result);
       });
 
-      // get all the prducts data from db
-      // app.get("/products", async (req, res) => {
-      //   const products = await productsCollection.find().toArray();
-      //   res.send(products);
-      // });
-
+      
       app.get("/products", async (req, res) => {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 12;
+        const { page = 1, limit = 12, search = "", brand, category, minPrice, maxPrice, sortBy } = req.query;
         const skip = (page - 1) * limit;
-  
+        const sortOptions = {};
+      
+        if (sortBy === "priceAsc") sortOptions.price = 1;
+        if (sortBy === "priceDesc") sortOptions.price = -1;
+        if (sortBy === "dateAsc") sortOptions.date_added = 1;
+        if (sortBy === "dateDesc") sortOptions.date_added = -1;
+      
+        const query = {
+          ...(search && { name: { $regex: search, $options: "i" } }),
+          ...(brand && { brand: { $regex: brand, $options: "i" } }), // Case-insensitive brand filter
+          ...(category && { category: category }),
+          ...(minPrice && maxPrice && { price: { $gte: Number(minPrice), $lte: Number(maxPrice) } })
+        };
+      
+        console.log("Query:", query); // Log the query
         try {
-          const totalProducts = await productsCollection.countDocuments();
+          const totalProducts = await productsCollection.countDocuments(query);
           const totalPages = Math.ceil(totalProducts / limit);
-  
-          const products = await productsCollection.find()
+      
+          const products = await productsCollection.find(query)
             .skip(skip)
-            .limit(limit)
+            .limit(Number(limit))
+            .sort(sortOptions)
             .toArray();
-  
+      
+          console.log("Fetched Products:", products); // Log the fetched products
           res.json({
             products,
             totalPages
@@ -92,7 +103,7 @@ async function run() {
           res.status(500).json({ error: "Internal Server Error" });
         }
       });
-  
+      
 
 
 
