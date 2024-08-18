@@ -64,11 +64,35 @@ async function run() {
       });
 
       // get all the prducts data from db
-      app.get("/products", async (req, res) => {
-        const products = await productsCollection.find().toArray();
-        res.send(products);
-      });
+      // app.get("/products", async (req, res) => {
+      //   const products = await productsCollection.find().toArray();
+      //   res.send(products);
+      // });
 
+      app.get("/products", async (req, res) => {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 12;
+        const skip = (page - 1) * limit;
+  
+        try {
+          const totalProducts = await productsCollection.countDocuments();
+          const totalPages = Math.ceil(totalProducts / limit);
+  
+          const products = await productsCollection.find()
+            .skip(skip)
+            .limit(limit)
+            .toArray();
+  
+          res.json({
+            products,
+            totalPages
+          });
+        } catch (error) {
+          console.error("Error fetching products:", error);
+          res.status(500).json({ error: "Internal Server Error" });
+        }
+      });
+  
 
 
 
