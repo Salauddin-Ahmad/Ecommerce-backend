@@ -9,7 +9,8 @@ const corsOptions = {
     "*",
     "http://localhost:5173",
     "http://localhost:5174",
-    "https://ecommerce-c5cf4.web.app/"
+    "https://ecommerce-c5cf4.web.app",
+    "https://estate-elite-server.vercel.app"
   ],
   credentials: true,
   optionSuccessStatus: 200,
@@ -82,7 +83,7 @@ async function run() {
           ...(minPrice && maxPrice && { price: { $gte: Number(minPrice), $lte: Number(maxPrice) } })
         };
       
-        console.log("Query:", query); // Log the query
+        // console.log("Query:", query); // Log the query
         try {
           const totalProducts = await productsCollection.countDocuments(query);
           const totalPages = Math.ceil(totalProducts / limit);
