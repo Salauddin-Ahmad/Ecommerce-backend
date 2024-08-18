@@ -10,7 +10,7 @@ const corsOptions = {
     "http://localhost:5173",
     "http://localhost:5174",
     "https://ecommerce-c5cf4.web.app",
-    "https://estate-elite-server.vercel.app"
+    "https://backend-ecommerce-tawny.vercel.app/"
   ],
   credentials: true,
   optionSuccessStatus: 200,
